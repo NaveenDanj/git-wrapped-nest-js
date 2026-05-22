@@ -22,7 +22,7 @@ services:
       - postgres
     ports:
       - "3000:3000"
-    environment:
+    environment:  
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: nestuser
