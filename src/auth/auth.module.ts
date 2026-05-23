@@ -7,14 +7,14 @@ import { GithubStrategy } from './github.strategy';
 import { AuthRepository } from './auth.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { JWTStrategy } from './local.strategy';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'github' }),
-    JwtModule.register({}),
     TypeOrmModule.forFeature([User])
   ],
   controllers: [AuthController],
-  providers: [AuthService, GithubStrategy, AuthRepository],
+  providers: [AuthService, GithubStrategy, JWTStrategy, AuthRepository],
 })
 export class AuthModule { }

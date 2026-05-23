@@ -25,6 +25,7 @@ import { JwtModule } from '@nestjs/jwt';
       synchronize: true,
     }),
     JwtModule.register({
+      global: true,
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: (parseInt(process.env.JWT_EXPIRES_IN || '7') || 7) * 1000 * 60 * 60 * 24 },
     }),

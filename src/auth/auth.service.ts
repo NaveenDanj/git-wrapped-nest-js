@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { GithubUser } from './github.strategy';
 import { JwtService } from '@nestjs/jwt';
-import { User } from './entities/user.entity';
-import * as bcryprt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +26,7 @@ export class AuthService {
 
     const newUser = await this.authRepository.createUser({
       displayName: githubUser.displayName,
+      username: githubUser.username,
       email: githubUser.email,
       githubId: githubUser.githubId,
       avatarURL: githubUser.avatarURL,

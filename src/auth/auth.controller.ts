@@ -23,6 +23,12 @@ export class AuthController {
     // This route will redirect the user to GitHub for authentication
   }
 
+  @Get("me")
+  @UseGuards(AuthGuard('jwt'))
+  async getProfile(@Req() req: RequestWithUser) {
+    return req.user;
+  }
+
   @Get("github/callback")
   @UseGuards(AuthGuard('github'))
   async githubLoginCallback(@Req() req: RequestWithUser) {
