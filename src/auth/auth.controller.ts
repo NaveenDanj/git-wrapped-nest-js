@@ -1,17 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
+import { GithubUser } from './github.strategy';
+
+interface RequestWithUser extends Request {
+  user: GithubUser;
+}
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
-  // @Post()
-  // create(@Body() createAuthDto: CreateAuthDto) {
-  //   return this.authService.create(createAuthDto);
-  // }
+  @Get("sample")
+  async sample() {
+    return { message: "This is a sample route" };
+  }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get("github")
+  @UseGuards(AuthGuard('github'))
+  async githubLogin() {
+    // This route will redirect the user to GitHub for authentication
+  }
+
+  @Get("github/callback")
+  @UseGuards(AuthGuard('github'))
+  async githubLoginCallback(@Req() req: RequestWithUser) {
+    return this.authService.loginWithGithub(req.user);
   }
 
 }

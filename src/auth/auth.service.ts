@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
-import { GithubUser } from './local.strategy';
+import { GithubUser } from './github.strategy';
 import { JwtService } from '@nestjs/jwt';
+import { User } from './entities/user.entity';
+import * as bcryprt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +15,7 @@ export class AuthService {
 
   async loginWithGithub(githubUser: GithubUser) {
     const user = await this.findOrCreateUser(githubUser);
-    const token = this.jwtService.sign({ userId: user.id });
+    const token = this.jwtService.sign({ sub: user.id, username: user.username });
     return { token, user };
   }
 
@@ -32,7 +34,6 @@ export class AuthService {
     })
 
     return newUser;
-
   }
 
 }

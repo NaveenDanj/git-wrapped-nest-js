@@ -21,6 +21,7 @@ import { JwtModule } from '@nestjs/jwt';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       entities: [User],
+      autoLoadEntities: true,
       synchronize: true,
     }),
     JwtModule.register({

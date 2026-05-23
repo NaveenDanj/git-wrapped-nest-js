@@ -20,9 +20,6 @@ export class User {
     @Column({ unique: true })
     avatarURL: string;
 
-    @Column()
-    password: string;
-
     @Column({ default: true })
     isActive: boolean;
 }
