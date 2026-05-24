@@ -19,7 +19,7 @@ import { JWTStrategy } from './local.strategy';
   exports: [
     PassportModule,
     AuthService,
-    JwtModule,
+    // JwtModule,
   ]
 })
 export class AuthModule { }

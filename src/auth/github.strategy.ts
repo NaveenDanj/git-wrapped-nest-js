@@ -9,6 +9,7 @@ export interface GithubUser {
     displayName: string;
     email: string;
     avatarURL: string;
+    accessToken: string;
 }
 
 @Injectable()
@@ -30,6 +31,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
             displayName: profile.displayName,
             email: profile.emails?.[0]?.value,
             avatarURL: profile.photos?.[0]?.value,
+            accessToken: accessToken,
         }
     }
 

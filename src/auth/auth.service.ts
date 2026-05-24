@@ -14,7 +14,7 @@ export class AuthService {
   async loginWithGithub(githubUser: GithubUser) {
     const user = await this.findOrCreateUser(githubUser);
     const token = this.jwtService.sign({ sub: user.id, username: user.username });
-    return { token, user };
+    return { token, user, accessToken: githubUser.accessToken };
   }
 
   async getCurrentUser(username: string) {

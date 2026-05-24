@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { GithubModule } from './github/github.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: (parseInt(process.env.JWT_EXPIRES_IN || '7') || 7) * 1000 * 60 * 60 * 24 },
     }),
-    AuthModule
+    AuthModule,
+    GithubModule
   ],
   controllers: [AppController],
   providers: [AppService],
