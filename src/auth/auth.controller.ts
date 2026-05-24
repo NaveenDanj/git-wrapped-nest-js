@@ -26,7 +26,7 @@ export class AuthController {
   @Get("me")
   @UseGuards(AuthGuard('jwt'))
   async getProfile(@Req() req: RequestWithUser) {
-    return req.user;
+    return this.authService.getCurrentUser(req.user.username);
   }
 
   @Get("github/callback")

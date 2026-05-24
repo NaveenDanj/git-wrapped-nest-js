@@ -17,6 +17,11 @@ export class AuthService {
     return { token, user };
   }
 
+  async getCurrentUser(username: string) {
+    const user = await this.authRepository.findByUsername(username);
+    return user;
+  }
+
   async findOrCreateUser(githubUser: GithubUser) {
     const existingUser = await this.authRepository.findByEmail(githubUser.email);
 
