@@ -26,14 +26,14 @@ export interface IntroStats {
     public_gists: number;
     created_at: string;
     location: string;
-    totalContributions: Promise<number>;
+    totalContributions: number;
 }
 
 export interface TotalActivityStats {
     totalCommits: number;
     totalPRs: number;
     totalIssues: number;
-    totalRepoContributedTo: Promise<number>;
+    totalRepoContributedTo: number;
 }
 
 export interface PRStats {
