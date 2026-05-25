@@ -12,9 +12,9 @@ export interface WrappedSlidesStat {
     totalActivityStats: TotalActivityStats;
     streakStats: StreakStats;
     languageStats: { [key: string]: number; };
-    activeRepos: GithubRepo[];
     prStats: PRStats;
     personality: { personality: PersonalityType; score: number };
+    activeRepos: { repo: string, commitCount: number }[];
 }
 
 export interface IntroStats {

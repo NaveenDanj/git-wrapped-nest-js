@@ -21,6 +21,7 @@ export interface GithubRepo {
     };
     private: boolean;
     description: string;
+    fork: boolean;
     forks_count: number;
     size: number;
     stargazers_count: number;

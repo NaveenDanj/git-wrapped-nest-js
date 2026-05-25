@@ -14,9 +14,15 @@ export class GithubService {
         private readonly httpService: HttpService
     ) { }
 
-    async getUserProfile(username: string) {
+    async getUserProfile(username: string, accessToken: string) {
         try {
-            const response = await this.httpService.axiosRef.get(`${this.baseURL}/users/${username}`);
+            const response = await this.httpService.axiosRef.get(`${this.baseURL}/users/${username}`, {
+                headers: {
+                    Accept: 'application/vnd.github+json',
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const { followers, following, public_repos, public_gists, created_at, location, bio } = response.data;
             return <GithubUserStat>{
                 followers,
@@ -78,9 +84,22 @@ export class GithubService {
         return response.data.data.user as GithubContributionStat;
     }
 
-    async getRepoCommits(username: string, repo: string) {
-        const response = await this.httpService.axiosRef.get(`${this.baseURL}/repos/${username}/${repo}/contributors`);
-        return response.data as GithubCommitStats[];
+    async getRepoCommits(username: string, repo: string, accessToken: string) {
+        const response = await this.httpService.axiosRef.get(`${this.baseURL}/repos/${username}/${repo}/contributors`, {
+            headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const out: GithubCommitStats[] = []
+        for (const contributor of response.data) {
+            out.push({
+                login: contributor.login,
+                contributions: contributor.contributions
+            });
+        }
+        return out;
     }
 
     async getTotalPr(username: string, accessToken: string) {
@@ -124,13 +143,22 @@ export class GithubService {
         return response.data as GithubPRSMergedtats;
     }
 
-    async getUseRepos(username: string) {
+    async getUseRepos(username: string, accessToken: string) {
         let page = 1;
         const perPage = 100;
         let repos: GithubRepo[] = [];
         while (true) {
-            const response = await this.httpService.axiosRef.get(`${this.baseURL}/users/${username}/repos`);
-            repos.push(...response.data);
+            const response = await this.httpService.axiosRef.get(`${this.baseURL}/users/${username}/repos`, {
+                params: {
+                    page,
+                    per_page: perPage,
+                },
+                headers: {
+                    Accept: 'application/vnd.github+json',
+                    Authorization: `Bearer ${accessToken}`,
+                }
+            });
+            repos.push(...response.data as GithubRepo[]);
             if (response.data.length < perPage) {
                 break;
             }
@@ -139,16 +167,22 @@ export class GithubService {
         return repos;
     }
 
-    async getRepoLanguages(owner: string, repo: string) {
-        const response = await this.httpService.axiosRef.get(`${this.baseURL}/repos/${owner}/${repo}/languages`);
+    async getRepoLanguages(owner: string, repo: string, accessToken: string) {
+        const response = await this.httpService.axiosRef.get(`${this.baseURL}/repos/${owner}/${repo}/languages`, {
+            headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
         return response.data as { [key: string]: number };
     }
 
-    async getUserLanguages(username: string) {
-        const repos = await this.getUseRepos(username);
+    async getUserLanguages(username: string, accessToken: string) {
+        const repos = await this.getUseRepos(username, accessToken);
         const languageCount: { [key: string]: number } = {};
         for (const repo of repos) {
-            const languages = await this.getRepoLanguages(repo.owner.login, repo.name);
+            const languages = await this.getRepoLanguages(repo.owner.login, repo.name, accessToken);
             for (const [language, count] of Object.entries(languages)) {
                 languageCount[language] = (languageCount[language] || 0) + count;
             }
@@ -156,8 +190,14 @@ export class GithubService {
         return languageCount;
     }
 
-    async getUserRecentEvents(username: string) {
-        const response = await this.httpService.axiosRef.get(`${this.baseURL}/users/${username}/events`);
+    async getUserRecentEvents(username: string, accessToken: string) {
+        const response = await this.httpService.axiosRef.get(`${this.baseURL}/users/${username}/events`, {
+            headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
         return response.data;
     }
 

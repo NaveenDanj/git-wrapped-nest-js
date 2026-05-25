@@ -3,7 +3,7 @@ import { GithubService } from '../github/github.service';
 import { GithubUserStat } from '../github/types/gitbub-user-stat';
 import { GithubContributionStat } from '../github/types/github-contribution-stat';
 import { GithubPRSMergedtats, GithubPRSOpenedtats, GithubRepo } from '../github/types/github-pr-stat';
-import { WrappedStats } from './wrapped-stats';
+import { WrappedStats } from './types/wrapped-stats';
 import { StreakStats } from './types/wrapped-types';
 import { WrappedSlidesStat } from './types/wrapped-slides-stat';
 
@@ -15,7 +15,7 @@ export class StatsService {
     ) { }
 
     async generateWrappedStats(username: string, accessToken: string): Promise<WrappedSlidesStat> {
-        const profileStats = await this.githubService.getUserProfile(username);
+        const profileStats = await this.githubService.getUserProfile(username, accessToken);
         const contributionStats = await this.githubService.getContributionStats(username, accessToken);
         const mergedPrStats = await this.githubService.getMergedPr(username, accessToken);
         const totalPrs = await this.githubService.getTotalPr(username, accessToken);
@@ -23,9 +23,9 @@ export class StatsService {
         const introStats = await this.generateIntroStats(profileStats, contributionStats, username);
         const totalActivityStats = await this.generateTotalActivitySlide(contributionStats);
         const streakStats = await this.calcStreaks(contributionStats);
-        const languageStats = await this.githubService.getUserLanguages(username);
-        const activeRepos = await this.githubService.getUseRepos(username);
+        const languageStats = await this.githubService.getUserLanguages(username, accessToken);
         const prStats = await this.calculatePRStats(mergedPrStats, totalPrs);
+        const activeRepos = await this.calculateActiveRepos(await this.githubService.getUseRepos(username, accessToken), username, accessToken);
 
         const wrappedStats: WrappedStats = {
             totalCommits: contributionStats.contributionsCollection.totalCommitContributions,
@@ -43,9 +43,9 @@ export class StatsService {
             totalActivityStats,
             streakStats,
             languageStats,
-            activeRepos,
             prStats,
             personality,
+            activeRepos
         }
 
 
@@ -144,19 +144,19 @@ export class StatsService {
         }
     }
 
-    async calculateActiveRepos(repos: GithubRepo[], username: string) {
-        const activeRepos: { repo: GithubRepo, commitCount: number }[] = [];
+    async calculateActiveRepos(repos: GithubRepo[], username: string, accessToken: string) {
+        const activeRepos: { repo: string, commitCount: number }[] = [];
 
         for (const repo of repos) {
-            const response = await this.githubService.getRepoCommits(username, repo.name);
-            const userCommitData = response.find((contributor: any) => contributor.login === username);
+            if (repo.fork) continue;
+            const response = await this.githubService.getRepoCommits(username, repo.name, accessToken);
+            const userCommitData = response.find((contributor) => contributor.login.toLowerCase() === username.toLowerCase());
             if (userCommitData) {
-                activeRepos.push({ repo, commitCount: userCommitData.contributions });
+                activeRepos.push({ repo: repo.name, commitCount: userCommitData.contributions });
             }
         }
-
         activeRepos.sort((a, b) => b.commitCount - a.commitCount);
-        return activeRepos
+        return activeRepos.slice(0, 5);
     }
 
     async developerPersonality(wrappedStats: WrappedStats) {
