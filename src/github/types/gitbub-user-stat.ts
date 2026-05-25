@@ -6,4 +6,5 @@ export interface GithubUserStat {
     created_at: string;
     location: string;
     bio: string;
+    profile_avatar: string;
 }

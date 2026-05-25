@@ -16,7 +16,7 @@ export class AppController {
 
   @Get('test/:username/:token')
   getTest(@Param('username') username: string, @Param('token') token: string): any {
-    return this.githubService.getContributionStats(username, token);
+    return this.githubService.getMergedPr(username, token);
   }
 
 }

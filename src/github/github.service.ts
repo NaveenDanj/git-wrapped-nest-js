@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { GithubUserStat } from './types/gitbub-user-stat';
 import { firstValueFrom } from 'rxjs';
 import { GithubContributionStat } from './types/github-contribution-stat';
+import { GithubPRSMergedtats, GithubPRSOpenedtats, GithubRepo } from './types/github-pr-stat';
+import { GithubCommitStats } from './types/github-commits';
 
 @Injectable()
 export class GithubService {
@@ -76,6 +78,11 @@ export class GithubService {
         return response.data.data.user as GithubContributionStat;
     }
 
+    async getRepoCommits(username: string, repo: string) {
+        const response = await this.httpService.axiosRef.get(`${this.baseURL}/repos/${username}/${repo}/contributors`);
+        return response.data as GithubCommitStats[];
+    }
+
     async getTotalPr(username: string, accessToken: string) {
         const currentYear = new Date().getFullYear();
         const query = `author:${username} is:pr created:${currentYear}-01-01..${currentYear}-12-31`;
@@ -93,7 +100,7 @@ export class GithubService {
             })
         );
 
-        return response.data;
+        return response.data as GithubPRSOpenedtats;
     }
 
 
@@ -114,7 +121,39 @@ export class GithubService {
             })
         );
 
-        return response.data;
+        return response.data as GithubPRSMergedtats;
+    }
+
+    async getUseRepos(username: string) {
+        let page = 1;
+        const perPage = 100;
+        let repos: GithubRepo[] = [];
+        while (true) {
+            const response = await this.httpService.axiosRef.get(`${this.baseURL}/users/${username}/repos`);
+            repos.push(...response.data);
+            if (response.data.length < perPage) {
+                break;
+            }
+            page++;
+        }
+        return repos;
+    }
+
+    async getRepoLanguages(owner: string, repo: string) {
+        const response = await this.httpService.axiosRef.get(`${this.baseURL}/repos/${owner}/${repo}/languages`);
+        return response.data as { [key: string]: number };
+    }
+
+    async getUserLanguages(username: string) {
+        const repos = await this.getUseRepos(username);
+        const languageCount: { [key: string]: number } = {};
+        for (const repo of repos) {
+            const languages = await this.getRepoLanguages(repo.owner.login, repo.name);
+            for (const [language, count] of Object.entries(languages)) {
+                languageCount[language] = (languageCount[language] || 0) + count;
+            }
+        }
+        return languageCount;
     }
 
     async getUserRecentEvents(username: string) {

@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './auth/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { GithubModule } from './github/github.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { GithubModule } from './github/github.module';
       signOptions: { expiresIn: (parseInt(process.env.JWT_EXPIRES_IN || '7') || 7) * 1000 * 60 * 60 * 24 },
     }),
     AuthModule,
-    GithubModule
+    GithubModule,
+    StatsModule
   ],
   controllers: [AppController],
   providers: [AppService],
