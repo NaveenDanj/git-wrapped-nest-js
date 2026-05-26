@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:16
@@ -14,20 +12,34 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7-alpine
+    container_name: nest_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
   api:
     build: .
     container_name: nest_api
     restart: always
     depends_on:
       - postgres
+      - redis
+
     ports:
       - "3000:3000"
-    environment:  
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: nestuser
-      DB_PASS: nestpass
-      DB_NAME: gitwrapped_db
+
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: nestuser
+      DATABASE_PASSWORD: nestpass
+      DATABASE_NAME: gitwrapped_db
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
     volumes:
       - .:/app
       - /app/node_modules

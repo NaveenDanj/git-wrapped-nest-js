@@ -19,7 +19,6 @@ export class StatsService {
     ) { }
 
     async generateWrappedStats(username: string, accessToken: string): Promise<WrappedSlidesStat> {
-        // Fetch all data in parallel instead of sequentially
         const [
             profileStats,
             contributionStats,
@@ -34,7 +33,6 @@ export class StatsService {
             this.githubService.getUseRepos(username, accessToken),
         ]);
 
-        // Calculate stats in parallel using helper methods
         const [
             introStats,
             totalActivityStats,
@@ -51,10 +49,7 @@ export class StatsService {
             this.repoAnalyzer.calculateActiveRepos(repos, username, accessToken),
         ]);
 
-        // Build wrapped stats
         const wrappedStats = this.buildWrappedStats(contributionStats, profileStats, languageStats, mergedPrStats);
-
-        // Calculate personality based on all stats
         const personality = this.personalityCalc.calculatePersonality(wrappedStats);
 
         return {
@@ -68,9 +63,7 @@ export class StatsService {
         };
     }
 
-    /**
-     * Build wrapped stats from contribution data
-     */
+
     private buildWrappedStats(
         contributionStats: GithubContributionStat,
         profileStats: GithubUserStat,
@@ -111,8 +104,6 @@ export class StatsService {
             totalRepoContributedTo,
         };
     }
-
-
 
     async calculatePRStats(mergedPrStats: GithubPRSMergedtats, totalPrStats: GithubPRSOpenedtats) {
         const mergedPRCount = mergedPrStats.total_count;

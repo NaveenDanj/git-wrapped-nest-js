@@ -8,6 +8,8 @@ import { User } from './auth/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { GithubModule } from './github/github.module';
 import { StatsModule } from './stats/stats.module';
+import { QueueModule } from './queue/queue.module';
+import { BullModule } from '@nestjs/bullmq'
 
 @Module({
   imports: [
@@ -31,9 +33,18 @@ import { StatsModule } from './stats/stats.module';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: (parseInt(process.env.JWT_EXPIRES_IN || '7') || 7) * 1000 * 60 * 60 * 24 },
     }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(
+          process.env.REDIS_PORT || '6379'
+        )
+      }
+    }),
     AuthModule,
     GithubModule,
-    StatsModule
+    StatsModule,
+    QueueModule
   ],
   controllers: [AppController],
   providers: [AppService],
