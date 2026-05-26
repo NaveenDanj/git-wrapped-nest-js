@@ -10,6 +10,7 @@ import { GithubModule } from './github/github.module';
 import { StatsModule } from './stats/stats.module';
 import { QueueModule } from './queue/queue.module';
 import { BullModule } from '@nestjs/bullmq'
+import { WrappedModule } from './wrapped/wrapped.module';
 
 @Module({
   imports: [
@@ -44,7 +45,8 @@ import { BullModule } from '@nestjs/bullmq'
     AuthModule,
     GithubModule,
     StatsModule,
-    QueueModule
+    QueueModule,
+    WrappedModule
   ],
   controllers: [AppController],
   providers: [AppService],
