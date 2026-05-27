@@ -1,26 +1,53 @@
 import { Injectable } from '@nestjs/common';
-import { CreateWrappedDto } from './dto/create-wrapped.dto';
-import { UpdateWrappedDto } from './dto/update-wrapped.dto';
+import { WrappedRepository } from '../wrapped-data/wrapped-data.repository';
+import { AuthRepository } from '../auth/auth.repository';
+import { WrappedStatus, WrappedType } from '../wrapped-data/entities/wrapped.entity';
+import { QueueService } from '../queue/queue.service';
 
 @Injectable()
 export class WrappedService {
-  create(createWrappedDto: CreateWrappedDto) {
-    return 'This action adds a new wrapped';
+
+  constructor(
+    private readonly wrappedRepository: WrappedRepository,
+    private readonly authRepository: AuthRepository,
+    private readonly queueService: QueueService
+  ) { }
+
+  async generateWrapped(username: string, token: string) {
+    const year = new Date().getFullYear();
+    const user = await this.authRepository.findByUsername(username);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const wrapped = await this.wrappedRepository.create({
+      userId: user.id,
+      githubUsername: username,
+      title: `Git Wrapped ${year} for ${username}`,
+      type: WrappedType.YEARLY,
+      year,
+      status: WrappedStatus.PENDING,
+    });
+
+    const res = await this.queueService.handleWrappedJob(wrapped.id, username, token);
+    return res;
+
   }
 
-  findAll() {
-    return `This action returns all wrapped`;
+  findAllUserWrapped(userId: number) {
+    return this.wrappedRepository.getItemsByUserId(userId);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} wrapped`;
+  findOne(id: string, userId: number) {
+    return this.wrappedRepository.findOneByUserId(id, userId);
   }
 
-  update(id: number, updateWrappedDto: UpdateWrappedDto) {
-    return `This action updates a #${id} wrapped`;
+  updateWrappedStatus(id: string, status: WrappedStatus) {
+    return this.wrappedRepository.create({ id, status });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} wrapped`;
+  remove(id: string, userId: number) {
+    return this.wrappedRepository.deleteByUserId(id, userId);
   }
 }

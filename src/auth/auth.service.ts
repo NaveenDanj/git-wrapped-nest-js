@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { GithubUser } from './github.strategy';
 import { JwtService } from '@nestjs/jwt';
+import { access } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,7 @@ export class AuthService {
 
   async loginWithGithub(githubUser: GithubUser) {
     const user = await this.findOrCreateUser(githubUser);
-    const token = this.jwtService.sign({ sub: user.id, username: user.username });
+    const token = this.jwtService.sign({ sub: user.id, username: user.username, accessToken: githubUser.accessToken });
     return { token, user, accessToken: githubUser.accessToken };
   }
 

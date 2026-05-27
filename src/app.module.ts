@@ -11,6 +11,7 @@ import { StatsModule } from './stats/stats.module';
 import { QueueModule } from './queue/queue.module';
 import { BullModule } from '@nestjs/bullmq'
 import { WrappedModule } from './wrapped/wrapped.module';
+import { WrappedDataModule } from './wrapped-data/wrapped-data.module';
 
 @Module({
   imports: [
@@ -46,7 +47,8 @@ import { WrappedModule } from './wrapped/wrapped.module';
     GithubModule,
     StatsModule,
     QueueModule,
-    WrappedModule
+    WrappedModule,
+    WrappedDataModule
   ],
   controllers: [AppController],
   providers: [AppService],

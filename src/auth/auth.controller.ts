@@ -4,9 +4,21 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { GithubUser } from './github.strategy';
 
-interface RequestWithUser extends Request {
+export interface JwtUser {
+  id: number;
+  username: string;
+  accessToken: string;
+}
+
+export interface RequestWithGithubUser extends Request {
   user: GithubUser;
 }
+
+export interface RequestWithJwtUser extends Request {
+  user: JwtUser;
+}
+
+export type RequestWithUser = RequestWithGithubUser | RequestWithJwtUser;
 
 @Controller('auth')
 export class AuthController {
@@ -25,13 +37,15 @@ export class AuthController {
 
   @Get("me")
   @UseGuards(AuthGuard('jwt'))
-  async getProfile(@Req() req: RequestWithUser) {
-    return this.authService.getCurrentUser(req.user.username);
+  async getProfile(@Req() req: RequestWithJwtUser) {
+    const token = req.user.accessToken;
+    const user = await this.authService.getCurrentUser(req.user.username);
+    return { user, token };
   }
 
   @Get("github/callback")
   @UseGuards(AuthGuard('github'))
-  async githubLoginCallback(@Req() req: RequestWithUser) {
+  async githubLoginCallback(@Req() req: RequestWithGithubUser) {
     return this.authService.loginWithGithub(req.user);
   }
 

@@ -4,13 +4,15 @@ import { BullModule } from '@nestjs/bullmq';
 import { StatsModule } from '../stats/stats.module';
 import { WrappedQueueService } from './services/wrapped-queue.service';
 import { WrappedProcessor } from './wrapped.processor';
+import { WrappedDataModule } from '../wrapped-data/wrapped-data.module';
 
 @Module({
   imports: [
     BullModule.registerQueue({
       name: 'wrapped_jobs'
     }),
-    StatsModule
+    StatsModule,
+    WrappedDataModule
   ],
   providers: [
     QueueService,

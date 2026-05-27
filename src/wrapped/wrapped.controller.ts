@@ -1,34 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { WrappedService } from './wrapped.service';
-import { CreateWrappedDto } from './dto/create-wrapped.dto';
-import { UpdateWrappedDto } from './dto/update-wrapped.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RequestWithJwtUser } from '../auth/auth.controller';
 
 @Controller('wrapped')
 export class WrappedController {
-  constructor(private readonly wrappedService: WrappedService) {}
+  constructor(private readonly wrappedService: WrappedService) { }
 
-  @Post()
-  create(@Body() createWrappedDto: CreateWrappedDto) {
-    return this.wrappedService.create(createWrappedDto);
+  @Post('generate')
+  @UseGuards(AuthGuard('jwt'))
+  generateWrapped(@Req() req: RequestWithJwtUser) {
+    console.log("Generating wrapped for user:", req.user.username);
+    console.log("Access token:", req.user.accessToken);
+    return this.wrappedService.generateWrapped(req.user.username, req.user.accessToken);
   }
 
-  @Get()
-  findAll() {
-    return this.wrappedService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wrappedService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWrappedDto: UpdateWrappedDto) {
-    return this.wrappedService.update(+id, updateWrappedDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wrappedService.remove(+id);
-  }
 }

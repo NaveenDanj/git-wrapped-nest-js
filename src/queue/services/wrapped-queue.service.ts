@@ -1,7 +1,6 @@
 import { InjectQueue } from "@nestjs/bullmq";
 import { Injectable } from "@nestjs/common";
 import { Job, Queue } from "bullmq";
-import { WrappedSlidesStat } from "../../stats/types/wrapped-slides-stat";
 
 @Injectable()
 export class WrappedQueueService {
@@ -11,11 +10,12 @@ export class WrappedQueueService {
         private wrappedQueue: Queue
     ) { }
 
-    async generateWrapped(username: string, token: string) {
+    async generateWrapped(wrappedId: string, username: string, token: string) {
 
         return this.wrappedQueue.add('generate-wrapped-data', {
             username,
-            token
+            token,
+            wrappedId
         },
             {
                 attempts: 3,

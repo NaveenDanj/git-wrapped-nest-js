@@ -20,7 +20,7 @@ export class AppController {
 
   @Get('test/:username/:token')
   getTest(@Param('username') username: string, @Param('token') token: string): any {
-    return this.queueService.handleWrappedJob(username, token);
+    // return this.queueService.handleWrappedJob(username, token);
   }
 
   @Get('status/:jobId')
