@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { Comment } from "./entities/comment.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -25,7 +25,7 @@ export class CommentRepository {
         const comment = await this.commentRepository.findOne({ where: { id: commentId, userId } })
 
         if (!comment) {
-            throw new Error("Comment not found or unauthorized");
+            throw new HttpException('Comment not found or unauthorized', 404);
         }
 
         comment.content = content;
@@ -35,13 +35,13 @@ export class CommentRepository {
     async deleteComment(commentId: string, userId: number) {
         const comment = await this.commentRepository.findOne({ where: { id: commentId, userId } });
         if (!comment) {
-            throw new Error('Comment not found or unauthorized');
+            throw new HttpException('Comment not found or unauthorized', 404);
         }
 
         const res = await this.commentRepository.delete({ id: commentId });
 
         if (res.affected === 0) {
-            throw new Error('Failed to delete comment');
+            throw new HttpException('Failed to delete comment', 400);
         }
 
         return
@@ -51,7 +51,7 @@ export class CommentRepository {
         const res = await this.commentRepository.delete({ wrappedId, userId });
 
         if (res.affected === 0) {
-            throw new Error('Failed to delete comments');
+            throw new HttpException('Failed to delete comments', 400);
         }
 
         return

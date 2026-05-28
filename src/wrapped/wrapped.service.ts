@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { WrappedRepository } from '../wrapped-data/wrapped-data.repository';
 import { AuthRepository } from '../auth/auth.repository';
 import { WrappedStatus, WrappedType } from '../wrapped-data/entities/wrapped.entity';
@@ -19,7 +19,7 @@ export class WrappedService {
     const user = await this.authRepository.findByUsername(username);
 
     if (!user) {
-      throw new Error('User not found');
+      throw new HttpException('User not found', 404);
     }
 
     const wrapped = await this.wrappedRepository.create({
@@ -39,11 +39,11 @@ export class WrappedService {
   async getWrappedJobStatus(userId: number, wrappedId: string) {
     const wrapped = await this.wrappedRepository.findById(wrappedId);
     if (!wrapped) {
-      throw new Error('Wrapped not found');
+      throw new HttpException('Wrapped not found', 404);
     }
 
     if (wrapped.userId !== userId) {
-      throw new Error('Unauthorized');
+      throw new HttpException('Unauthorized', 403);
     }
 
     const res = await this.queueService.handleGetWrappedJobStatus(wrapped.jobId || '');
@@ -68,7 +68,7 @@ export class WrappedService {
     console.log('Delete result:', res);
 
     if (res.affected === 0) {
-      return { message: 'Wrapped not found or unauthorized' };
+      throw new HttpException('Wrapped not found or unauthorized', 404);
     }
 
     return { message: 'Wrapped deleted successfully' };

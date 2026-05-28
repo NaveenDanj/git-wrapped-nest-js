@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { GithubUserStat } from './types/gitbub-user-stat';
 import { firstValueFrom } from 'rxjs';
 import { GithubContributionStat } from './types/github-contribution-stat';
@@ -35,7 +35,7 @@ export class GithubService {
             };
         } catch (error) {
             console.error('Error fetching GitHub user profile:', error);
-            throw new Error('Failed to fetch GitHub user profile');
+            throw new HttpException('Failed to fetch GitHub user profile', 400);
         }
     }
 
