@@ -1,4 +1,4 @@
-import { Processor, WorkerHost } from "@nestjs/bullmq";
+import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Job } from "bullmq";
 import { StatsService } from "../stats/stats.service";
 import { WrappedSlidesStat } from "../stats/types/wrapped-slides-stat";
@@ -16,21 +16,19 @@ export class WrappedProcessor extends WorkerHost {
     }
 
     async process(job: Job<{ wrappedId: string, username: string, token: string }, WrappedSlidesStat>): Promise<WrappedSlidesStat> {
-        try {
+        const wrappedData = await this.statService.generateWrappedStats(job.data.username, job.data.token);
+        await job.updateProgress(100);
+        await this.wrappedRepository.updateWrappedStatus(job.data.wrappedId, WrappedStatus.COMPLETED);
+        await this.wrappedRepository.updateWrappedData(job.data.wrappedId, wrappedData);
+        return wrappedData;
+    }
 
-            const wrappedData = await this.statService.generateWrappedStats(job.data.username, job.data.token);
-            await job.updateProgress(100);
-            await this.wrappedRepository.updateWrappedStatus(job.data.wrappedId, WrappedStatus.COMPLETED);
-            await this.wrappedRepository.updateWrappedData(job.data.wrappedId, wrappedData);
-            return wrappedData;
+    @OnWorkerEvent('failed')
+    async onFailed(job: Job, err: Error) {
+        console.error(`Job ${job.id} failed with error: ${err.message}`);
 
-        } catch (err) {
-
-            if (job.attemptsMade >= 3) {
-                await this.wrappedRepository.updateWrappedStatus(job.data.wrappedId, WrappedStatus.FAILED);
-            }
-
-            throw err;
+        if (job.attemptsMade >= (job.opts.attempts ?? 3)) {
+            await this.wrappedRepository.updateWrappedStatus(job.data.wrappedId, WrappedStatus.FAILED);
         }
     }
 
