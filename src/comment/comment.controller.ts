@@ -1,34 +1,40 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import type { UpdateCommentDto } from './dto/update-comment.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RequestWithJwtUser } from '../auth/auth.controller';
 
 @Controller('comment')
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+  constructor(private readonly commentService: CommentService) { }
 
-  @Post()
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentService.create(createCommentDto);
+  @Post("create")
+  @UseGuards(AuthGuard('jwt'))
+  create(@Body() createCommentDto: CreateCommentDto, @Req() req: RequestWithJwtUser) {
+    return this.commentService.create(createCommentDto, req.user.id);
   }
 
-  @Get()
-  findAll() {
-    return this.commentService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.commentService.findOne(+id);
+  @Get(":id")
+  findAll(@Param('wrappedId') wrappedId: string) {
+    return this.commentService.findAll(wrappedId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentService.update(+id, updateCommentDto);
+  @UseGuards(AuthGuard('jwt'))
+  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto, @Req() req: RequestWithJwtUser) {
+    return this.commentService.update(id, updateCommentDto, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentService.remove(+id);
+  @UseGuards(AuthGuard('jwt'))
+  remove(@Param('id') id: string, @Req() req: RequestWithJwtUser) {
+    return this.commentService.remove(id, req.user.id);
+  }
+
+  @Delete('wrapped/:wrappedId')
+  @UseGuards(AuthGuard('jwt'))
+  removeByWrappedId(@Param('wrappedId') wrappedId: string, @Req() req: RequestWithJwtUser) {
+    return this.commentService.removeByWrappedId(wrappedId, req.user.id);
   }
 }

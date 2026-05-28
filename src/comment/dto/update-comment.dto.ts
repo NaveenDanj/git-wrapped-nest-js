@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCommentDto } from './create-comment.dto';
+import z from "zod";
+import { createZodDto } from "nestjs-zod";
 
-export class UpdateCommentDto extends PartialType(CreateCommentDto) {}
+export const UpdateCommentSchema = z.object({
+    wrappedId: z.uuid("Invalid wrappedId format"),
+    content: z.string().min(1, "Content cannot be empty").
+        max(500, "Content cannot exceed 500 characters")
+})
+
+export class UpdateCommentDto extends createZodDto(UpdateCommentSchema) { }
