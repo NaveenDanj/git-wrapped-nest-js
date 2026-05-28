@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { GithubUser } from './github.strategy';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 export interface JwtUser {
   id: number;
@@ -20,15 +21,12 @@ export interface RequestWithJwtUser extends Request {
 
 export type RequestWithUser = RequestWithGithubUser | RequestWithJwtUser;
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
-  @Get("sample")
-  async sample() {
-    return { message: "This is a sample route" };
-  }
-
+  @ApiOperation({ summary: 'Initiate GitHub OAuth login' })
   @Get("github")
   @UseGuards(AuthGuard('github'))
   async githubLogin() {

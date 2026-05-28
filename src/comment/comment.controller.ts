@@ -16,7 +16,7 @@ export class CommentController {
   }
 
   @Get(":id")
-  findAll(@Param('wrappedId') wrappedId: string) {
+  findAll(@Param('id') wrappedId: string) {
     return this.commentService.findAll(wrappedId);
   }
 
