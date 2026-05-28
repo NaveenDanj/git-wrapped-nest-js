@@ -36,6 +36,10 @@ export class WrappedRepository {
         return this.wrappedRepo.update({ id }, { status });
     }
 
+    async updateWrappedData(id: string, data: Record<string, any>) {
+        return this.wrappedRepo.update({ id }, { data });
+    }
+
     async updateWrappedJobId(id: string, jobId: string) {
         return this.wrappedRepo.update({ id }, { jobId });
     }

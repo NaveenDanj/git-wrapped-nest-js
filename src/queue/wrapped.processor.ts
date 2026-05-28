@@ -19,6 +19,7 @@ export class WrappedProcessor extends WorkerHost {
         const wrappedData = await this.statService.generateWrappedStats(job.data.username, job.data.token);
         await job.updateProgress(100);
         await this.wrappedRepository.updateWrappedStatus(job.data.wrappedId, WrappedStatus.COMPLETED);
+        await this.wrappedRepository.updateWrappedData(job.data.wrappedId, wrappedData);
         return wrappedData;
     }
 

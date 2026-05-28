@@ -3,6 +3,7 @@ import { WrappedRepository } from '../wrapped-data/wrapped-data.repository';
 import { AuthRepository } from '../auth/auth.repository';
 import { WrappedStatus, WrappedType } from '../wrapped-data/entities/wrapped.entity';
 import { QueueService } from '../queue/queue.service';
+import { DeleteResult } from 'typeorm';
 
 @Injectable()
 export class WrappedService {
@@ -31,9 +32,24 @@ export class WrappedService {
     });
 
     const res = await this.queueService.handleWrappedJob(wrapped.id, username, token);
+    await this.wrappedRepository.updateWrappedJobId(wrapped.id, res.id || '');
     return res;
-
   }
+
+  async getWrappedJobStatus(userId: number, wrappedId: string) {
+    const wrapped = await this.wrappedRepository.findById(wrappedId);
+    if (!wrapped) {
+      throw new Error('Wrapped not found');
+    }
+
+    if (wrapped.userId !== userId) {
+      throw new Error('Unauthorized');
+    }
+
+    const res = await this.queueService.handleGetWrappedJobStatus(wrapped.jobId || '');
+    return res;
+  }
+
 
   findAllUserWrapped(userId: number) {
     return this.wrappedRepository.getItemsByUserId(userId);
@@ -47,7 +63,14 @@ export class WrappedService {
     return this.wrappedRepository.create({ id, status });
   }
 
-  remove(id: string, userId: number) {
-    return this.wrappedRepository.deleteByUserId(id, userId);
+  async remove(id: string, userId: number) {
+    const res: DeleteResult = await this.wrappedRepository.deleteByUserId(id, userId);
+    console.log('Delete result:', res);
+
+    if (res.affected === 0) {
+      return { message: 'Wrapped not found or unauthorized' };
+    }
+
+    return { message: 'Wrapped deleted successfully' };
   }
 }
