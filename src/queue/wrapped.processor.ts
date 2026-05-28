@@ -16,11 +16,22 @@ export class WrappedProcessor extends WorkerHost {
     }
 
     async process(job: Job<{ wrappedId: string, username: string, token: string }, WrappedSlidesStat>): Promise<WrappedSlidesStat> {
-        const wrappedData = await this.statService.generateWrappedStats(job.data.username, job.data.token);
-        await job.updateProgress(100);
-        await this.wrappedRepository.updateWrappedStatus(job.data.wrappedId, WrappedStatus.COMPLETED);
-        await this.wrappedRepository.updateWrappedData(job.data.wrappedId, wrappedData);
-        return wrappedData;
+        try {
+
+            const wrappedData = await this.statService.generateWrappedStats(job.data.username, job.data.token);
+            await job.updateProgress(100);
+            await this.wrappedRepository.updateWrappedStatus(job.data.wrappedId, WrappedStatus.COMPLETED);
+            await this.wrappedRepository.updateWrappedData(job.data.wrappedId, wrappedData);
+            return wrappedData;
+
+        } catch (err) {
+
+            if (job.attemptsMade >= 3) {
+                await this.wrappedRepository.updateWrappedStatus(job.data.wrappedId, WrappedStatus.FAILED);
+            }
+
+            throw err;
+        }
     }
 
 }
