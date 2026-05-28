@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { GithubUser } from './github.strategy';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+
 
 export interface JwtUser {
   id: number;
@@ -43,8 +45,10 @@ export class AuthController {
 
   @Get("github/callback")
   @UseGuards(AuthGuard('github'))
-  async githubLoginCallback(@Req() req: RequestWithGithubUser) {
-    return this.authService.loginWithGithub(req.user);
+  async githubLoginCallback(@Req() req: RequestWithGithubUser, @Res() res: Response) {
+    const result = await this.authService.loginWithGithub(req.user);
+    const token = result.token;
+    return res.redirect(`${process.env.Frontend_BASE_URL}/callback?token=${token}`);
   }
 
 }
